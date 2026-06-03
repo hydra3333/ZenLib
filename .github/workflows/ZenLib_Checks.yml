@@ -60,23 +60,18 @@ jobs:
   CMake:
     strategy:
       matrix:
-        include:
-          - runner: windows-latest
-            CXXFLAGS: "/WX"
-          - runner: ubuntu-latest
-            CXXFLAGS: "-Werror"
-          - runner: macos-latest
-            CXXFLAGS: "-Werror"
+        runner: [windows-latest, windows-11-arm, ubuntu-latest, macos-latest]
+        unicode_setting: [default, utf-8]
       fail-fast: false
-    name: CMake (${{ matrix.runner }})
+    name: CMake (${{ matrix.runner }}${{ matrix.unicode_setting == 'utf-8' && ', utf-8' || '' }})
     runs-on: ${{ matrix.runner }}
     env:
-      CXXFLAGS: ${{ matrix.CXXFLAGS }}
+      CXXFLAGS: ${{ contains(matrix.runner, 'windows') && '/WX' || '-Werror' }}
     steps:
       - name: Checkout ZenLib
         uses: actions/checkout@v6
       - name: Configure CMake project
-        run: cmake -S Project/CMake -B build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S Project/CMake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.unicode_setting == 'utf-8' && '-DENABLE_UNICODE=OFF' || '' }}
       - name: Build CMake project
         run: cmake --build build ${{ runner.os == 'Windows' && '--config Release' || '-j4' }}
 

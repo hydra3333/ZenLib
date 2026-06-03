@@ -2374,7 +2374,11 @@ bool Ztring::IsNumber() const
 //Mise en minuscules
 Ztring &Ztring::MakeLowerCase()
 {
-    transform(begin(), end(), begin(), (int(*)(int))tolower); //(int(*)(int)) is a patch for unix
+#if defined(__UNICODE__)
+    transform(begin(), end(), begin(), [](wchar_t c) { return towlower(c); });
+#else // defined(__UNICODE__)
+    transform(begin(), end(), begin(), [](unsigned char c) { return tolower(c); });
+#endif // defined(__UNICODE__)
     return *this;
 }
 
@@ -2382,7 +2386,11 @@ Ztring &Ztring::MakeLowerCase()
 // Mise en majuscules
 Ztring &Ztring::MakeUpperCase()
 {
-    transform(begin(), end(), begin(), (int(*)(int))toupper); //(int(*)(int)) is a patch for unix
+#if defined(__UNICODE__)
+    transform(begin(), end(), begin(), [](wchar_t c) { return towupper(c); });
+#else // defined(__UNICODE__)
+    transform(begin(), end(), begin(), [](unsigned char c) { return toupper(c); });
+#endif // defined(__UNICODE__)
     return *this;
 }
 
